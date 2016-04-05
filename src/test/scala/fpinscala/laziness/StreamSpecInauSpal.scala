@@ -15,8 +15,8 @@ import Arbitrary.arbitrary
 // library streams are stricter than those from the book, so some laziness tests
 // fail on them :)
 
-// import stream00._    // uncomment to test the book solution
-import stream01._ // uncomment to test the broken headOption implementation
+ import stream00._    // uncomment to test the book solution
+//import stream01._ // uncomment to test the broken headOption implementation
 // import stream02._ // uncomment to test another version that breaks headOption
 
 class StreamSpecInauSpal extends FlatSpec with Checkers {
@@ -25,15 +25,8 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
   behavior of "headOption"
 
   it should "not force the tail of the stream" in {
-    // val s = Stream.cons(println("hej"), Stream.cons(println("med"), Stream.cons(println("dig"), Stream.empty[Unit])))
-    // s.headOption
-    // s match {
-    //   case Empty => println("lol")
-    //   case Cons(h,t) => {
-    //     println("t:"+ isTailEval(s))
-    //   }
-    // }
-    // println("s:"+s)
+    def testStream = cons("a", cons(throw new java.lang.Exception("Tail was evaluated"), empty))
+	testStream.headOption
   }
 
   def isTailEval[A](s: Stream[A]): Boolean =
