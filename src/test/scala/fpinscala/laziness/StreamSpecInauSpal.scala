@@ -123,18 +123,6 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
         s.drop (n).toList == s.toList.drop (n) } )
   }
 
-  // it should "lol" in check {
-  //   implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
-  //   implicit def intGen = Arbitrary[Int] (Gen.choose(0, Int.MaxValue/2))
-
-  // Prop.forAll { (s: Stream[Int], n: Int) => {
-  //   println("n:"+n)
-  //     (n < lengthOfStream (s)) ==> 
-  //     (lengthOfStream (s.drop (n)) == lengthOfStream (s)-n) }
-    
-  // }
-// }
-
   // An example generator of random finite non-empty streams
   def list2stream[A] (la :List[A]): Stream[A] = la.foldRight (empty[A]) (cons[A](_,_))
 
