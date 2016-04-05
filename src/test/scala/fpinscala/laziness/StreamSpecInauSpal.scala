@@ -69,7 +69,8 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
   behavior of "take"
 
   it should "return an empty List when taking from an empty Stream" in check {
-    Prop.forAll { (n: Int) => empty.take (n).toList == List.empty }
+    Prop.forAll(positiveInts) { (n) => 
+      empty.take (n) == Stream.empty }
   }
 
   it should "return the first elements of an arbitrary Stream" in check {
@@ -108,8 +109,7 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
         m <- Gen.choose(0, Int.MaxValue/2-1)
         } yield (n,m)
       )
-    Prop.forAll {
-      (s: Stream[Int], v: (Int,Int)) => {
+    Prop.forAll { (s: Stream[Int], v: (Int,Int)) => {
         val (n, m) = v
         s.drop(n).drop(m) == s.drop(n+m) } }
   }
