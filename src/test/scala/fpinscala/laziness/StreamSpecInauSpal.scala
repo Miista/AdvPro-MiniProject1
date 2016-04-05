@@ -22,6 +22,24 @@ import stream00._    // uncomment to test the book solution
 class StreamSpecInauSpal extends FlatSpec with Checkers {
   import Stream._
 
+  behavior of "map"
+
+  def sumOfStream(s: Stream[Int]) = s.foldRight (0)(_+_)
+
+  it should "sum correctly" in check {
+    implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    Prop.forAll {
+      (s: Stream[Int], n: Int) => 
+        sumOfStream(s) * n == sumOfStream(s.map (_*n))
+    }
+  }
+
+  it should "return itself when mapping with identity" in check {
+    implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    Prop.forAll {
+      (s: Stream[Int]) => s.map (identity).toList == s.toList }
+  }
+
   behavior of "take"
 
   it should "return an empty List when taking from an empty Stream" in check {
