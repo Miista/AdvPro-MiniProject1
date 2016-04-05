@@ -15,16 +15,24 @@ import Arbitrary.arbitrary
 // library streams are stricter than those from the book, so some laziness tests
 // fail on them :)
 
-import stream00._    // uncomment to test the book solution
+// import stream00._    // uncomment to test the book solution
 // import stream01._ // uncomment to test the broken headOption implementation
 // import stream02._ // uncomment to test another version that breaks headOption
 
 class StreamSpecInauSpal extends FlatSpec with Checkers {
   import Stream._
 
-  behavior of "map"
+  behavior of "append"
 
-  def sumOfStream(s: Stream[Int]) = s.foldRight (0)(_+_)
+  it should "return the same sum of two appended Streams" in check {
+    implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    Prop.forAll {
+      (s1: Stream[Int], s2: Stream[Int]) => {
+        sumOfStream (s1.append (s2)) == sumOfStream (s1) + sumOfStream (s2) }
+    }
+  }
+
+  behavior of "map"
 
   it should "sum correctly" in check {
     implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
@@ -63,8 +71,7 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
 
   it should "return an empty List when dropping from an empty Stream" in check {
     Prop.forAll {
-      (n: Int) => empty.drop (n).toList == List.empty
-    }
+      (n: Int) => empty.drop (n).toList == List.empty }
   }
 
   it should "drop the same elements from a List" in check {
@@ -74,6 +81,21 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
     ("drop from stream" |: 
       Prop.forAll { (s: Stream[Int], n: Int) =>
         s.drop (n).toList == s.toList.drop (n) } )
+  }
+
+  it should "lol" in check {
+    implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def intGen = Arbitrary[Int] (Gen.choose(0,100))
+
+  Prop.forAll {
+    (s: Stream[Int], n: Int) => 
+      (n < lengthOfStream (s)) ==> (lengthOfStream (s.drop (n)) == lengthOfStream (s)-n)
+  }
+  
+  // ("length of drop" |:
+  //     Prop.forAll { (s: Stream[Int], n: Int) =>
+  //       lengthOfStream (s.drop (n)) == lengthOfStream (s)-n
+  //     } )
   }
 
   // An example generator of random finite non-empty streams
@@ -89,4 +111,9 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
     for {
       la <- arbitrary[List[A]] suchThat (_.nonEmpty)
     } yield la
+
+  // Helper methods
+  def sumOfStream(s: Stream[Int]) = s.foldRight (0)(_+_)
+
+  def lengthOfStream(s: Stream[Int]) = s.foldRight (0)((_,s) => s+1)
 }
