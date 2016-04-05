@@ -24,20 +24,38 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
 
   behavior of "take"
 
-  it should "return an empty List when taking from an empty Stream" in {
-    assert (empty.take (5).toList == List.empty)
+  it should "return an empty List when taking from an empty Stream" in check {
+    Prop.forAll { (n: Int) => empty.take (n).toList == List.empty }
   }
 
-  it should "return the 10 first elements of an arbitrary Stream" in check {
-    implicit def arbitraryIntList = Arbitrary[List[Int]] (genNonEmptyList[Int])
+  it should "return the first elements of an arbitrary Stream" in check {
+    implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
     implicit def intGen = Arbitrary[Int] (Gen.choose(0,200))
 
     ("take from stream" |: 
-      Prop.forAll { (l: List[Int], n: Int) =>
-        list2stream (l).take (n).toList == l.take (n) } ) && 
+      Prop.forAll { (s: Stream[Int], n: Int) =>
+        s.take (n).toList == s.toList.take (n) } ) && 
     ("take then stream" |:
       Prop.forAll { 
-        (la: List[Int], n: Int) => list2stream (la).take (n).toList == list2stream (la.take (n)).toList } )
+        (s: Stream[Int], n: Int) => 
+        s.take (n).toList == s.toList.take (n).toList } )
+  }
+
+  behavior of "drop"
+
+  it should "return an empty List when dropping from an empty Stream" in check {
+    Prop.forAll {
+      (n: Int) => empty.drop (n).toList == List.empty
+    }
+  }
+
+  it should "drop the same elements from a List" in check {
+    implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    implicit def intGen = Arbitrary[Int] (Gen.choose(0,200))
+
+    ("drop from stream" |: 
+      Prop.forAll { (s: Stream[Int], n: Int) =>
+        s.drop (n).toList == s.toList.drop (n) } )
   }
 
   // An example generator of random finite non-empty streams
