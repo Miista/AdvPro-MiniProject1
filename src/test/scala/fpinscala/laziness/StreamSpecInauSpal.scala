@@ -54,18 +54,16 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
 
   behavior of "map"
 
-  it should "sum correctly" in check {
-    implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
-    Prop.forAll {
-      (s: Stream[Int], n: Int) => 
-        sumOfStream(s) * n == sumOfStream(s.map (_*n))
-    }
+  it should "respect associativity" in check {
+    def f(n: Int): Int = n+1
+    def g(n: Int): Int = n*2
+    Prop.forAll(intStreams, positiveInts) { (s, n) => 
+      s.map(f).map(g).toList == s.map(f _ andThen g).toList }
   }
 
-  it should "return itself when mapping with identity" in check {
-    implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
-    Prop.forAll {
-      (s: Stream[Int]) => s.map (identity).toList == s.toList }
+  it should "respect identity" in check {
+    Prop.forAll(intStreams) { (s) =>
+      s.map (identity).toList == s.toList }
   }
 
   behavior of "take"
@@ -80,10 +78,10 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
 
     ("take from stream" |: 
       Prop.forAll { (s: Stream[Int], n: Int) =>
-        s.take (n).toList == s.toList.take (n) } ) && 
+        s.take (n).toList == s.toList.take (n) } 
+    ) && 
     ("take then stream" |:
-      Prop.forAll { 
-        (s: Stream[Int], n: Int) => 
+      Prop.forAll { (s: Stream[Int], n: Int) => 
         s.take (n).toList == s.toList.take (n).toList } )
   }
 
@@ -92,15 +90,14 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
 
   it should "respect idempotency" in check {
     Prop.forAll(intStreams, positiveInts) { (s, n) => 
-      s.take(n).take(n).toList == s.take (n).toList
-    }
+      s.take(n).take(n).toList == s.take (n).toList }
   }
 
   behavior of "drop"
 
   it should "return an empty List when dropping from an empty Stream" in check {
-    Prop.forAll {
-      (n: Int) => empty.drop (n).toList == List.empty }
+    Prop.forAll(positiveInts) { (n) => 
+      empty.drop(n) == Stream.empty }
   }
 
   it should "respect additivity" in check {
@@ -126,14 +123,17 @@ class StreamSpecInauSpal extends FlatSpec with Checkers {
         s.drop (n).toList == s.toList.drop (n) } )
   }
 
-  it should "lol" in check {
-    implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
-    implicit def intGen = Arbitrary[Int] (Gen.choose(0,100))
+  // it should "lol" in check {
+  //   implicit def arbitraryIntList = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+  //   implicit def intGen = Arbitrary[Int] (Gen.choose(0, Int.MaxValue/2))
 
-  Prop.forAll {
-    (s: Stream[Int], n: Int) => 
-      (n < lengthOfStream (s)) ==> (lengthOfStream (s.drop (n)) == lengthOfStream (s)-n) }
-  }
+  // Prop.forAll { (s: Stream[Int], n: Int) => {
+  //   println("n:"+n)
+  //     (n < lengthOfStream (s)) ==> 
+  //     (lengthOfStream (s.drop (n)) == lengthOfStream (s)-n) }
+    
+  // }
+// }
 
   // An example generator of random finite non-empty streams
   def list2stream[A] (la :List[A]): Stream[A] = la.foldRight (empty[A]) (cons[A](_,_))
