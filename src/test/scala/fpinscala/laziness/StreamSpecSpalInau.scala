@@ -45,6 +45,13 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
     } }
   }
 
+  it should "respect commutativity" in check {
+    val ints = Gen.choose(1, 10)
+    Prop.forAll(streams, ints, ints) { (s, n, m) => {
+      s.take(n).take(m) === s.take(m).take(n)
+    } }
+  }
+
   it should "return an empty Stream when taking zero" in {
     assert (streams.sample.get.take(0) == empty)
   }
@@ -111,6 +118,13 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
     Prop.forAll(streams, Gen.choose(0,20), Gen.choose(0,20)) { (s,m,n) =>
       (m+n < s.length()) ==> (s.drop(m).drop(n) === s.drop(m+n))
     }
+  }
+
+  it should "respect commutativity" in check {
+    val ints = Gen.choose(1, 10)
+    Prop.forAll(streams, ints, ints) { (s, n, m) => {
+      s.drop(n).drop(m) === s.drop(m).drop(n)
+    } }
   }
 
   val streams = genNonEmptyStream[Int]
