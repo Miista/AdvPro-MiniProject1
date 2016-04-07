@@ -114,7 +114,7 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
     }
   }
 
-  it should "respect associativity" in check {
+  it should "respect additivity" in check {
     Prop.forAll(streams, Gen.choose(0,20), Gen.choose(0,20)) { (s,m,n) =>
       (m+n < s.length()) ==> (s.drop(m).drop(n) === s.drop(m+n))
     }
