@@ -19,6 +19,10 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
     s.headOption
   }
 
+  it should "return None on an empty Stream" in {
+    assert(empty.headOption == None)
+  }
+
   // TAKE
   behavior of "take"
 
