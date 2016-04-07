@@ -14,7 +14,7 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
 
   behavior of "headOption"
 
-  it should "not force the" in {
+  it should "not force the tail" in {
     val s = cons(1, cons(throw new java.lang.Exception(), cons(println("hey"), empty)))
     s.headOption
   }
