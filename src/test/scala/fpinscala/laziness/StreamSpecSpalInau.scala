@@ -151,15 +151,15 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
 
   implicit class EqStream[A] (s: Stream[A]) {
     private def isEqual[Int] (s1: Stream[Int], s2: Stream[Int]) = {
-      val bools: Stream[Boolean] = s1.zipWithAll[Int, Boolean] (s2)(
-        (o1: Option[Int],o2: Option[Int]) => {
-          val cond: Option[Boolean] = o1.flatMap((a: Int) => o2.map ((b: Int) => a == b));
-          cond match {
-            case None => false
-            case Some(x) => x
-          }
-        }
-      )
+      def zipAndCompare(o1: Option[Int], o2: Option[Int]): Boolean = {
+        val cmp = for { // Essentially map2'ing
+          a <- o1
+          b <- o2
+        } yield a == b
+        !cmp.isEmpty // If the result is empty, the match couldn't be performed
+      }
+
+      val bools: Stream[Boolean] = s1.zipWithAll (s2)(zipAndCompare)
       bools.forAll (_ == true)
     }
 
