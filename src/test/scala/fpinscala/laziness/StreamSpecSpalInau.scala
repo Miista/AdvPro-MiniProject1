@@ -147,6 +147,8 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
 
     def ===(that: Stream[A]) = isEqual(s, that)
 
+    def ≡(that: Stream[A]) = isEqual(s, that)
+
     def length() = s.foldRight (0)((_,s) => s+1)
   }
 }
