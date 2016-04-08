@@ -135,6 +135,13 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
     }
   }
 
+  it should "return a subset of the Stream when n < |S|" in check {
+    Prop.forAll(streams) { (s) =>
+      val n = s.length()-1
+      (0 < s.length()) ==> (s.drop(n) =/= empty)
+    }
+  }
+
   val streams = genNonEmptyStream[Int]
   val positiveInts = arbitrary[Int].suchThat (0 < _)
   
@@ -170,6 +177,8 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
     def ===(that: Stream[A]) = isEqual(s, that)
 
     def ≡(that: Stream[A]) = isEqual(s, that)
+
+    def =/=(that: Stream[A]) = !isEqual(s, that)
 
     def length() = s.foldRight (0)((_,s) => s+1)
     }
