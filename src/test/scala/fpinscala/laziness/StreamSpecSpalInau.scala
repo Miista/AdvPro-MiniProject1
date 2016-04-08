@@ -44,13 +44,13 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
     assert (empty.take(5) == empty)
   }
 
-  it should "return the entire Stream" in check {
+  it should "return the entire Stream when n > |S|" in check {
     Prop.forAll (streams, positiveInts) { (s, n) =>
       (n > s.length()) ==> (s.take(n) === s)
     }
   }
 
-  it should "return a subset of the Stream" in check {
+  it should "return a subset of the Stream when 0 < n < |S|" in check {
     Prop.forAll (streams) { (s) => {
       val n = s.length()-1
       (n > 0) ==> (!(s === s.take (n))) } }
@@ -63,7 +63,7 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
   // APPEND
   behavior of "append"
 
-  it should "respect identity" in {
+  it should "respect identity (S + unit)" in {
     val stream: Stream[Int] = streams.sample.get
     assert (stream.append (empty) === stream)
   }
@@ -113,9 +113,9 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
 
   it should "respect commutativity" in check {
     val ints = Gen.choose(1, 10)
-    Prop.forAll(streams, ints, ints) { (s, n, m) => {
+    Prop.forAll(streams, ints, ints) { (s, n, m) =>
       s.drop(n).drop(m) === s.drop(m).drop(n)
-    } }
+    }
   }
 
   it should "return an empty Stream" in check {
