@@ -68,6 +68,11 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
     assert (stream.append (empty) === stream)
   }
 
+  it should "respect identity (unit + S)" in {
+    val stream: Stream[Int] = streams.sample.get
+    assert (empty.append (stream) === stream)
+  }
+
   it should "respect additivity" in check {
     Prop.forAll (streams, streams) { (s1,s2) =>
       s1.append (s2).length() == s1.length() + s2.length()
