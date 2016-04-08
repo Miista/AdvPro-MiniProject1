@@ -26,6 +26,20 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
   // TAKE
   behavior of "take"
 
+  it should "respect commutativity" in check {
+    val ints = Gen.choose(1, 10)
+    Prop.forAll(streams, ints, ints) { (s, n, m) => {
+      s.take(n).take(m) === s.take(m).take(n)
+    } }
+  }
+
+  it should "respect transitivity" in check {
+    Prop.forAll(streams, Gen.choose(1, 10)) { (s, n) => {
+      val m = n-1
+      (n < s.length()) ==> (s.take(n).take(m) === s.take(m))
+    } }
+  }
+
   it should "return an empty Stream when taking from empty" in {
     assert (empty.take(5) == empty)
   }
@@ -42,20 +56,6 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
       (n > 0) ==> (!(s === s.take (n))) } }
   }
 
-  it should "respect transitivity" in check {
-    Prop.forAll(streams, Gen.choose(1, 10)) { (s, n) => {
-      val m = n-1
-      (n < s.length()) ==> (s.take(n).take(m) === s.take(m))
-    } }
-  }
-
-  it should "respect commutativity" in check {
-    val ints = Gen.choose(1, 10)
-    Prop.forAll(streams, ints, ints) { (s, n, m) => {
-      s.take(n).take(m) === s.take(m).take(n)
-    } }
-  }
-
   it should "return an empty Stream when taking zero" in {
     assert (streams.sample.get.take(0) == empty)
   }
@@ -63,22 +63,21 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
   // APPEND
   behavior of "append"
 
-  it should "respect associativity" in check {
-    ("test 1" |:
-      Prop.forAll(streams, streams) { (s1,s2) =>
-        s1.append (s2).length() == s1.length() + s2.length()
-      }
-    ) && 
-    ("test2" |:
-      Prop.forAll(streams, streams, streams) { (s1,s2,s3) =>
-        s1.length() + s2.append (s3).length() == s1.append(s2).length() + s3.length()
-      }
-    )
-  }
-
   it should "respect identity" in {
     val stream: Stream[Int] = streams.sample.get
     assert (stream.append (empty) === stream)
+  }
+
+  it should "respect additivity" in check {
+    Prop.forAll (streams, streams) { (s1,s2) =>
+      s1.append (s2).length() == s1.length() + s2.length()
+    }
+  }
+
+  it should "respect associativity" in check {
+    Prop.forAll(streams, streams, streams) { (s1,s2,s3) =>
+      s1.length() + s2.append (s3).length() == s1.append(s2).length() + s3.length()
+    }
   }
 
   // MAP
@@ -100,21 +99,9 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
   // DROP
   behavior of "drop"
 
-  it should "return an empty Stream" in check {
-    Prop.forAll(arbitrary[Int]) { (n) =>
-      empty.drop (n) == empty
-    }
-  }
-
   it should "respect identity" in check {
     Prop.forAll(streams) { (s) =>
       s.drop(0) === s
-    }
-  }
-
-  it should "return empty when n > |S|" in check {
-    Prop.forAll(streams, positiveInts) { (s,n) =>
-      (n > s.length()) ==> (s.drop(n) == empty)
     }
   }
 
@@ -129,6 +116,18 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
     Prop.forAll(streams, ints, ints) { (s, n, m) => {
       s.drop(n).drop(m) === s.drop(m).drop(n)
     } }
+  }
+
+  it should "return an empty Stream" in check {
+    Prop.forAll(arbitrary[Int]) { (n) =>
+      empty.drop (n) == empty
+    }
+  }
+
+  it should "return empty when n > |S|" in check {
+    Prop.forAll(streams, positiveInts) { (s,n) =>
+      (n > s.length()) ==> (s.drop(n) == empty)
+    }
   }
 
   val streams = genNonEmptyStream[Int]
@@ -168,5 +167,5 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
     def ≡(that: Stream[A]) = isEqual(s, that)
 
     def length() = s.foldRight (0)((_,s) => s+1)
-  }
+    }
 }
