@@ -23,6 +23,16 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
     assert(empty.headOption == None)
   }
 
+  it should "return the head of the stream packaged in Some (02)" in check {
+    // the implict makes the generator available in the context
+    implicit def arbIntStream = Arbitrary[Stream[Int]] (genNonEmptyStream[Int])
+    ("singleton" |:
+      Prop.forAll { (n :Int) => cons (n,empty).headOption == Some (n) } ) &&
+    ("random" |:
+      Prop.forAll { (s :Stream[Int]) => s.headOption != None } )
+
+  }
+
   // TAKE
   behavior of "take"
 
