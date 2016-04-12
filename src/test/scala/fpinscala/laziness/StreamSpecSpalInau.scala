@@ -101,6 +101,15 @@ class StreamSpecSpalInau extends FlatSpec with Checkers {
       s.map(f).map(g) === s.map(f _ andThen g) }
   }
 
+  it should "terminate on in/finite Streams" in {
+    def mkStream(): Stream[Int] =
+      cons (1, mkStream())
+
+    val s: Stream[Int] = mkStream() 
+    s.map (_/0)
+    assert (true)
+  }
+
   // DROP
   behavior of "drop"
 
